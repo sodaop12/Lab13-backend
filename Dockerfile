@@ -1,13 +1,12 @@
-# build stage
-FROM node:lts-alpine as build-stage
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+FROM openjdk:17-jdk-alpine
+RUN addgroup -S spring && adduser -S spring -G spring
+EXPOSE 8080
 
-# production stage
-FROM nginx:stable-alpine as production-stage
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+ENV JAVA_PROFILE prod,db
+ARG DEPENDENCY=target/dependency
+COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY ${DEPENDENCY}/META-INF /app/META-INF
+COPY ${DEPENDENCY}/BOOT-INF/classes /app
+
+ENTRYPOINT ["java" ,  "-Dspring.profiles.active=${JAVA_PROFILE}",\
+            "-cp","app:app/lib/*","se331.rest.LAbb13V4BackendApplication"]
