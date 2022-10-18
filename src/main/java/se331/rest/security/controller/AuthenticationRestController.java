@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import se331.rest.entity.Event;
 import se331.rest.entity.Organizer;
 import se331.rest.repository.OrganizerRepository;
+import se331.rest.security.entity.Authority;
+import se331.rest.security.entity.AuthorityName;
 import se331.rest.security.entity.JwtUser;
 import se331.rest.security.entity.User;
+import se331.rest.security.repository.AuthorityRepository;
 import se331.rest.security.repository.UserRepository;
 import se331.rest.security.service.UserService;
 import se331.rest.security.util.JwtTokenUtil;
@@ -54,6 +57,12 @@ public class AuthenticationRestController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    OrganizerRepository organizerRepository;
+
+    @Autowired
+    AuthorityRepository authorityRepository;
+
     @PostMapping("${jwt.route.authentication.path}")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtAuthenticationRequest authenticationRequest) throws AuthenticationException {
 
@@ -81,6 +90,8 @@ public class AuthenticationRestController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) throws  AuthenticationException{
         PasswordEncoder encoder = new BCryptPasswordEncoder();
+        Authority authAdmin = Authority.builder().name(AuthorityName.ROLE_ADMIN).build();
+        authorityRepository.save(authAdmin);
         User user2 = User.builder()
                 .enabled(true)
                 .email(user.getEmail())
@@ -92,8 +103,18 @@ public class AuthenticationRestController {
                         .atStartOfDay(ZoneId.systemDefault()).toInstant()))
                 .build();
 
+        user2.getAuthorities().add(authAdmin);
+        userRepository.save(user2);
+
+        Organizer organizer = Organizer.builder().name(user.getUsername()).build();
+        organizerRepository.save(organizer);
+
+        organizer.setUser(user2);
+        user2.setOrganizer(organizer);
+
         userService.save(user2);
         return ResponseEntity.ok(LabMapper.INSTANCE.getUserDTO(user2));
+
     }
 
 
