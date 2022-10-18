@@ -9,8 +9,6 @@ import org.springframework.stereotype.Repository;
 import se331.rest.entity.Event;
 import se331.rest.repository.EventRepository;
 
-import java.util.List;
-
 @Profile("db")
 @Repository
 public class EventDaoDbImpl implements EventDao {

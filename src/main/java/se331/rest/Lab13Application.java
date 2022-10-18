@@ -7,12 +7,11 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-public class Lab08Application {
+public class Lab13Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(Lab08Application.class, args);
+        SpringApplication.run(Lab13Application.class, args);
     }
-
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -25,6 +24,4 @@ public class Lab08Application {
             }
         };
     }
-
-
 }
